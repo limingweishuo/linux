@@ -1,0 +1,68 @@
+1、查询结果，输出对应列
+    uwsgi_master=$(ps aux|grep uwsgi|awk '{print $2,$15}')
+
+    for i in {$uwsgi_master}
+    do
+        echo $i
+        if [ $i = root ]
+        then
+            echo $i
+        fi
+    done
+
+2、服务器启动，查询后杀死进程，启动进程
+    uwsgi_master=$(ps aux|grep uwsgi|awk '{print $15}')
+    uwsgi_master_pid=$(ps aux|grep uwsgi|awk '{print $2}')
+
+    # 获取进程名称
+    echo "获取进程名称"
+    master_length=()
+    for i in {$uwsgi_master}
+    do
+        echo $i
+        master_length[${#master_length[@]}]=$i
+    done
+    echo ${#master_length[@]}
+
+    # 获取进程号
+    echo "获取进程号"
+    pid_master_length=()
+    for i in {$uwsgi_master_pid}
+    do
+        echo $i
+        i_clean=$(echo $i | sed 's/{//g' | sed 's/}//g')
+        pid_master_length[${#pid_master_length[@]}]=$i_clean
+    done
+    echo ${#pid_master_length[@]}
+
+    # 根据进程名称获取进程号，删除对应进程号
+    echo "删除uwsgi主进程"
+    for ((i=0;i<${#pid_master_length[@]};i++))
+    do
+        echo ${master_length[$i]}
+        if [ "${master_length[$i]}" = "{master" ]
+        then
+            echo ${pid_master_length[$i]}
+            kill -9 ${pid_master_length[$i]}
+        fi
+    done
+
+    killall nginx
+
+    sleep 1
+    echo "查询uesgi进程是否被删除完毕"
+    ps aux|grep uwsgi
+    echo -e "\n"
+    echo "查询nginx是否删除完毕"
+    ps aux|grep nginx
+
+    sleep 1
+    uwsgi --ini /home/lwx898295/web_uwsgi.ini
+    /usr/local/nginx/sbin//nginx -c /usr/local/nginx/nginx-1.13.1/conf/nginx.conf
+
+    sleep 2
+    echo "查询uwsgi进程是否重新建立"
+    ps aux|grep uwsgi
+    echo -e "\n"
+    echo "查询nginx是否建立"
+    ps aux|grep nginx
