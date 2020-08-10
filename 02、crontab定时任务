@@ -1,0 +1,75 @@
+1、cenntos linux [red hat]定时任务命令 crontab
+  --查询是否安装该命令  rpm -qa|grep crontab
+  --安装 crontab 工具  yum install crontabs
+  
+2、再次强调一个基本学习规律：不要想着去创新，先模仿和抄袭，等熟悉了再去加深内容
+
+3、基本使用之编辑 crontab 任务文本
+  --进入编辑模式：crontab -e  ||  点击 'i' 按钮进入编辑状态  ||  点击 'esc' 退出编辑状态  ||  :wq 保存退出  ||  q! 强制退出
+  --crantab编辑示例: [这个是菜鸟教程中示例]
+    实例1：每1分钟执行一次crontab_test.sh
+    * * * * * crontab_test.sh
+
+    实例2：每小时的第3和第15分钟执行
+    3,15 * * * * crontab_test.sh
+
+    实例3：在上午8点到11点的第3和第15分钟执行
+    3,15 8-11 * * * crontab_test.sh
+
+    实例4：每隔两天的上午8点到11点的第3和第15分钟执行
+    3,15 8-11 */2  *  * crontab_test.sh
+
+    实例5：每周一上午8点到11点的第3和第15分钟执行
+    3,15 8-11 * * 1 crontab_test.sh
+
+    实例6：每晚的21:30重启smb
+    30 21 * * * /etc/init.d/smb restart
+
+    实例7：每月1、10、22日的4 : 45重启smb
+    45 4 1,10,22 * * /etc/init.d/smb restart
+
+    实例8：每周六、周日的1 : 10重启smb
+    10 1 * * 6,0 /etc/init.d/smb restart
+
+    实例9：每天18 : 00至23 : 00之间每隔30分钟重启smb
+    0,30 18-23 * * * /etc/init.d/smb restart
+
+    实例10：每星期六的晚上11 : 00 pm重启smb
+    0 23 * * 6 /etc/init.d/smb restart
+
+    实例11：每一小时重启smb
+    * */1 * * * /etc/init.d/smb restart
+
+    实例12：晚上11点到早上7点之间，每隔一小时重启smb
+    * 23-7/1 * * * /etc/init.d/smb restart
+    
+4、纯 sh 文件定时任务编写的案例，centos系统linux [redhat]
+    --进入sh脚本文件 vim /data/lwx898295/crontab/test_crontab.sh  
+    --test_crontab.sh文件中输入脚本命令，把 yes 输入到crontab_test.txt中 
+        #! /bin/bash
+        echo "yes" >> /data/lwx898295/crontab/crontab_test.txt
+    --chmod 777 test_crontab.sh  赋予执行权限
+    --crontab -l 查看所配置的定时任务有哪些
+    --crontab -e 点击 i 进入编辑模式，输入命令如下：
+        # 命令表示：每分钟执行一次test_crontab.sh脚本
+        * * * * * /data/lwx898295/crontab/test_crontab.sh &  & 表示在后台执行
+        :wq 保存退出
+
+5、python + shell任务编写的案例      
+    --编写python文件，打印输出内容
+        import time
+        time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        print('当前时间为：\n', time)
+    
+    --在脚本执行python文件，这里python必须使用就绝对路径，即使用python安装路径
+        --vim python3_test.sh  创建python3_test.sh脚本文件
+        --本来 python3 crontab_test.py >> /data/lwx898295/crontan/log_crontab.txt即可
+        --但是这样是无法调用crontab的，即使你自己每一条命令单独输入都是可行的
+        --真实命令：/usr/local/python3/bin/python3 /data/lwx898295/contrab/contrab_test.py >> /data/lwx898295/contrab/python3_test.txt
+        --wq保存脚本
+        --chmod 777 python3_test.sh  赋予执行权限
+        
+    --编辑crantab命令列表，crontab -e进入编辑模式
+        --* * * * * /data/lwx898295/contrab/python3_test.sh &  & 表示后台执行
+        --:wq
+                
