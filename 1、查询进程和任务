@@ -1,0 +1,22 @@
+1、lsof命令：按照网络端口查询进程
+    --根据端口号查询进程
+    --lsof -i:端口号
+    
+    --查询结果如下：
+      COMMAND   PID     USER    FD    TYPE    DEVICE         SIZE/OFF  NODE   NAME
+      uwsgi     32267   root    4u    IPv4    113870722      0t0       TCP    *:irdmi (LISTEN)
+      uwsgi     32272   root    4u    IPv4    113870722      0t0       TCP    *:irdmi (LISTEN)
+      
+    --根据查询来的进程号PID，使用kill -9 PID杀死对应进程 
+
+2、netstat命令：按照网络端口查询进程
+  --netstat -tunlp|grep 端口号，用于查看指定端口号的进程情况
+    -t：(tcp)仅显示tcp相关选项
+    -u：(udp)仅显示udp相关选项
+    -n：拒绝显示别名，能显示数字的全部显示数字
+    -l：仅列出有在Listen(监听)的服务状态
+    -p：显示建立相关链接的程序名
+    
+  --netstat -tunlp|grep 8000 用于查看指定端口号的情况
+    这种方式可以查看端口号为8000的进程号是多少，而通过ps aux|grep uwsgi查询出的进程号不仅有主进程还有副进程的进程号，容易混淆无法杀死uwsgi，不如直接查询端口号来杀死进程。
+    这种方式查询出来的进程号只有一个所以不容易混淆。
