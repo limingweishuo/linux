@@ -8,6 +8,8 @@
       uwsgi     32272   root    4u    IPv4    113870722      0t0       TCP    *:irdmi (LISTEN)
       
     --根据查询来的进程号PID，使用kill -9 PID杀死对应进程 
+    
+    --相比于 ps aux|grep uwsgi 查询uwsgi进程，直接使用端口号8000进行查询更加快速便捷
 
 2、netstat命令：按照网络端口查询进程
   --netstat -tunlp|grep 端口号，用于查看指定端口号的进程情况
