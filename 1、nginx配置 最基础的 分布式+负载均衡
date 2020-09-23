@@ -1,0 +1,60 @@
+# 实测有效
+worker_processes  4;  # 4个进程接口
+
+events {
+    worker_connections  1024;  # 每个进程接口对应1024个url连接
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    sendfile        on;
+    keepalive_timeout  300;
+    client_max_body_size 50m;
+    gzip  on;
+    
+    # 这台机器ip为1000.24.*0.2，反向代理到 以下四个服务器上
+    upstream webservers{
+        server 1000.24.4*0.29:80  weight=2  max_fails=3  fail_timeout=5s;
+        server 1000.24.4*1.11:80  weight=5  max_fails=3  fail_timeout=5s;
+        server 1000.24.4*1.24:80  weight=2  max_fails=3  fail_timeout=5s;
+        server 1000.24.4*1.26:80  weight=2  max_fails=3  fail_timeout=5s;
+        keepalive 64;
+    }
+
+    server {
+        listen      80;
+        listen 443 ssl;
+        server_name  1000.24.*0.2;
+
+        charset 'utf-8';
+        #ssl on;
+        ssl_certificate /usr/local/nginx/nginx-1.13.3/server.crt;
+        ssl_certificate_key /usr/local/nginx/nginx-1.13.3/server.key;
+        ssl_verify_client off;
+        
+
+        #access_log  logs/host.access.log  main;
+
+        location / {
+            root   /data/*** ***/dist/;
+            index  index.html;
+            error_page 405 =200 /index.html;
+            try_files $uri $uri/ /index.html;
+        }
+
+        location /api {
+            proxy_read_timeout 1800;
+            proxy_pass http://webservers;
+        }
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+
+}
